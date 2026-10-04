@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SpeakUp – Parle anglais avec confiance</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBFAF6;--ink:#1B2A4A;--mut:#5d6a85;--card:#fff;--line:#e4e1d6;--sun:#F5B82E;--ok:#2E8B57;--bad:#C8442F;--on-sun:#1B2A4A;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a2e;--ink:#f3efe3;--mut:#9aa6c2;--card:#1b2640;--line:#2c3a5c}}
+:root[data-theme="dark"]{--bg:#121a2e;--ink:#f3efe3;--mut:#9aa6c2;--card:#1b2640;--line:#2c3a5c}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Bricolage Grotesque",system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:20px 18px 40px}
+h1{font-size:2rem;line-height:1.1;margin:8px 0 6px;font-weight:800}
+h2{font-size:1.3rem;margin:0 0 4px;font-weight:800}
+p{margin:0 0 12px;color:var(--mut)}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:600;color:var(--ink);background:var(--card);border:1.5px solid var(--line)}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.pri{background:var(--sun);color:var(--on-sun);border-color:var(--sun)}
+.row{display:flex;gap:10px;align-items:center}
+.lesson{width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:14px 16px}
+.lesson small{display:block;color:var(--mut);font-weight:400}
+.tag{font-size:.8rem;padding:3px 9px;border-radius:99px;background:var(--sun);color:var(--on-sun);font-weight:600}
+.tag.lock{background:transparent;border:1.5px solid var(--line);color:var(--mut)}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin:10px 0 18px}
+.bar i{display:block;height:100%;background:var(--sun);transition:width .3s}
+.phrase{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}
+.phrase .en{font-size:1.45rem;font-weight:800;margin-bottom:2px}
+.phrase .fr{color:var(--mut);margin-bottom:12px}
+.opt{display:block;width:100%;text-align:left;margin-bottom:10px}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:#fff}.opt.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.back{background:none;border:0;padding:6px 0;color:var(--mut)}
+.modal{position:fixed;inset:0;background:rgba(10,15,30,.6);display:none;align-items:flex-end;justify-content:center;z-index:9}
+.modal.on{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom,0px));max-height:90%;overflow:auto}
+.plan{display:block;width:100%;text-align:left;margin-bottom:10px;padding:14px 16px}
+.plan b{font-size:1.1rem}.plan.best{border-color:var(--sun);border-width:2.5px}
+ul.ben{padding-left:20px;margin:0 0 14px;color:var(--mut)}
+.score{font-size:3rem;font-weight:800}
+.note{font-size:.8rem;color:var(--mut);margin-top:10px}
+</style></head><body><main id="app"></main>
+<div class="modal" id="pw"><div class="sheet" role="dialog" aria-label="Passer à Premium">
+<h2>Passe à SpeakUp Premium</h2>
+<p>Débloque tout pour parler anglais sans blocage.</p>
+<ul class="ben"><li>Toutes les leçons : travail, voyage, entretiens</li><li>Exercices de prononciation illimités</li><li>Zéro limite quotidienne</li></ul>
+<label for="ph" style="font-weight:600">Ton numéro de téléphone</label><input id="ph" type="tel" inputmode="tel" placeholder="07 00 00 00 00" style="width:100%;margin:6px 0 12px;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit"><div id="err" style="color:var(--bad);margin-bottom:8px"></div>
+<button class="plan best" data-p="annuel"><b>8 000 FCFA / an</b><br><span style="color:var(--mut)">Soit ~670 FCFA/mois · le plus avantageux</span></button>
+<button class="plan" data-p="mensuel"><b>1 500 FCFA / mois</b><br><span style="color:var(--mut)">Sans engagement</span></button>
+<p class="note">Paiement sécurisé par Orange Money, MTN MoMo, Moov, Wave ou carte. Ton numéro sert à retrouver ton abonnement.</p>
+<button id="close" class="back">Plus tard</button></div></div>
+<script>
+const L=[
+{t:"Se présenter",free:1,p:[["Nice to meet you.","Enchanté."],["I'm from Abidjan.","Je viens d'Abidjan."],["What do you do?","Que faites-vous dans la vie ?"]]},
+{t:"Au restaurant",free:1,p:[["Can I see the menu, please?","Puis-je voir le menu, s'il vous plaît ?"],["I'd like some water.","Je voudrais de l'eau."],["Can I have the bill?","L'addition, s'il vous plaît."]]},
+{t:"Demander son chemin",free:1,p:[["Where is the station?","Où est la gare ?"],["How far is it?","C'est à quelle distance ?"],["Turn left at the corner.","Tournez à gauche au coin."]]},
+{t:"Entretien d'embauche",free:0,p:[["Tell me about yourself.","Parlez-moi de vous."],["I have five years of experience.","J'ai cinq ans d'expérience."],["I work well in a team.","Je travaille bien en équipe."]]},
+{t:"Au travail",free:0,p:[["Can we schedule a meeting?","Peut-on planifier une réunion ?"],["I'll send you the report.","Je vous enverrai le rapport."],["Could you repeat that?","Pouvez-vous répéter ?"]]},
+{t:"Voyager",free:0,p:[["I have a reservation.","J'ai une réservation."],["Where is the baggage claim?","Où sont les bagages ?"],["How much is a taxi?","Combien coûte un taxi ?"]]},
+{t:"Faire les courses",free:0,p:[["How much does this cost?","Combien ça coûte ?"],["Do you have a smaller size?","Avez-vous une taille plus petite ?"],["Can you give me a discount?","Pouvez-vous me faire une réduction ?"]]},
+{t:"Au téléphone",free:0,p:[["Who's calling, please?","Qui est à l'appareil ?"],["Can I leave a message?","Puis-je laisser un message ?"],["I'll call you back later.","Je vous rappelle plus tard."]]},
+{t:"Chez le médecin",free:0,p:[["I don't feel well.","Je ne me sens pas bien."],["I've had a fever since yesterday.","J'ai de la fièvre depuis hier."],["Where does it hurt?","Où avez-vous mal ?"]]},
+{t:"Donner son avis",free:0,p:[["In my opinion, it's a good idea.","À mon avis, c'est une bonne idée."],["I don't agree with you.","Je ne suis pas d'accord avec vous."],["Let me explain why.","Laissez-moi expliquer pourquoi."]]}];
+let premium=false,done=0;const $=s=>document.querySelector(s),app=$("#app"),pw=$("#pw");
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+function home(){const free=L.filter(l=>l.free).length;
+app.innerHTML=`<h1>Parle anglais,<br>une phrase à la fois.</h1><p>Écoute, répète, puis teste-toi. ${premium?"Premium actif : tout est débloqué.":free+" leçons gratuites, le reste en Premium."}</p>
+<div class="bar"><i style="width:${done/L.length*100}%"></i></div>
+${L.map((l,i)=>{const lock=!l.free&&!premium;return `<button class="lesson" data-i="${i}"><span>${l.t}<small>${l.p.length} phrases + quiz</small></span><span class="tag ${lock?"lock":""}">${lock?"Premium":(l.done?"Fait":"Gratuit")}</span></button>`}).join("")}
+${premium?"":`<button class="pri lesson" id="up"><span>Débloquer toutes les leçons<small style="color:inherit;opacity:.8">À partir de 670 FCFA/mois</small></span><span>Voir</span></button>`}`;
+app.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const l=L[b.dataset.i];(!l.free&&!premium)?pw.classList.add("on"):lesson(+b.dataset.i)});
+const up=$("#up");if(up)up.onclick=()=>pw.classList.add("on")}
+function lesson(i){const l=L[i];
+app.innerHTML=`<button class="back" id="b">← Leçons</button><h2>${l.t}</h2><p>Touche pour écouter, puis répète à voix haute.</p>
+${l.p.map((p,k)=>`<div class="phrase"><div class="en">${p[0]}</div><div class="fr">${p[1]}</div><div class="row"><button data-s="${k}">Écouter</button><button data-r="${k}">Je répète</button></div></div>`).join("")}
+<button class="pri" id="q" style="width:100%">Passer au quiz</button>`;
+$("#b").onclick=home;$("#q").onclick=()=>quiz(i);
+app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>say(l.p[b.dataset.s][0]));
+app.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>speak(b,l.p[b.dataset.r][0]))}
+function speak(b,target){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){b.textContent="Dis-la à voix haute";return}
+const r=new SR();r.lang="en-US";b.textContent="Je t'écoute…";
+r.onresult=e=>{const h=e.results[0][0].transcript.toLowerCase().replace(/[^a-z' ]/g,""),t=target.toLowerCase().replace(/[^a-z' ]/g,"").split(" ");
+const m=t.filter(w=>h.includes(w)).length/t.length;b.textContent=m>.8?"Excellent !":m>.5?"Presque, réessaie":"Écoute et réessaie"};
+r.onerror=()=>b.textContent="Micro indisponible";r.onend=()=>{if(b.textContent==="Je t'écoute…")b.textContent="Je répète"};
+try{r.start()}catch(e){b.textContent="Micro indisponible"}}
+function quiz(i){const l=L[i];let n=0,s=0;
+(function next(){if(n>=l.p.length){l.done=1;done=L.filter(x=>x.done).length;
+app.innerHTML=`<p>Quiz terminé</p><div class="score">${s}/${l.p.length}</div><p>${s===l.p.length?"Parfait. Tu parles déjà plus clairement.":"Reviens sur la leçon pour renforcer les phrases ratées."}</p><button class="pri" id="h" style="width:100%">Retour aux leçons</button>`;$("#h").onclick=home;return}
+const p=l.p[n],others=L.flatMap(x=>x.p).filter(x=>x[1]!==p[1]).sort(()=>Math.random()-.5).slice(0,2),opts=[p,...others].sort(()=>Math.random()-.5);
+app.innerHTML=`<p>Question ${n+1} sur ${l.p.length}</p><div class="bar"><i style="width:${n/l.p.length*100}%"></i></div><h2>Que veut dire :</h2><div class="phrase"><div class="en">${p[0]}</div><button data-s style="margin-top:8px">Écouter</button></div>
+${opts.map((o,k)=>`<button class="opt" data-k="${k}">${o[1]}</button>`).join("")}`;
+$("[data-s]").onclick=()=>say(p[0]);
+app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const good=opts[b.dataset.k]===p;if(good)s++;b.classList.add(good?"ok":"bad");
+app.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(opts[x.dataset.k]===p)x.classList.add("ok")});setTimeout(()=>{n++;next()},900)})})()}
+function ph(){return $("#ph").value.replace(/\D/g,"")}
+async function chk(p){try{const r=await fetch("/api/status?phone="+p);if((await r.json()).premium){premium=true;return true}}catch(e){}return false}
+pw.querySelectorAll("[data-p]").forEach(b=>b.onclick=async()=>{const p=ph();if(p.length<8){$("#err").textContent="Entre un numéro valide.";return}
+$("#err").textContent="Redirection vers le paiement…";try{localStorage.setItem("su_phone",p)}catch(e){}
+try{const r=await fetch("/api/pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:p,plan:b.dataset.p})});const j=await r.json();
+if(j.url)location.href=j.url;else $("#err").textContent=j.error||"Erreur, réessaie."}catch(e){$("#err").textContent="Connexion impossible."}});
+async function init(){let p="";try{p=localStorage.getItem("su_phone")||""}catch(e){}
+if(p){$("#ph").value=p;await chk(p)}home()}
+$("#close").onclick=()=>pw.classList.remove("on");
+init();
+</script></body></html>
